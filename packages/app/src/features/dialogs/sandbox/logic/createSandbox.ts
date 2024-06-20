@@ -2,7 +2,7 @@ import { Address, parseEther, parseUnits } from 'viem'
 
 import { apiUrl } from '@/config/consts'
 import { AppConfig } from '@/config/feature-flags'
-import { createTenderlyFork } from '@/domain/sandbox/createTenderlyFork'
+import { createTenderlyFork, createTenderlyVnet } from '@/domain/sandbox/createTenderlyFork'
 import { publicTenderlyActions } from '@/domain/sandbox/publicTenderlyActions'
 import { BaseUnitNumber } from '@/domain/types/NumericValues'
 
@@ -12,7 +12,7 @@ export async function createSandbox(opts: {
   userAddress: Address
   mintBalances: NonNullable<AppConfig['sandbox']>['mintBalances']
 }): Promise<string> {
-  const { rpcUrl: forkUrl } = await createTenderlyFork({
+  const { rpcUrl: forkUrl } = await createTenderlyVnet({
     namePrefix: 'sandbox',
     originChainId: opts.originChainId,
     forkChainId: opts.forkChainId,
