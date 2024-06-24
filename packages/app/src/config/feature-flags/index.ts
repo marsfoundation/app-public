@@ -11,7 +11,6 @@ export const getAppConfig = import.meta.env.MODE === 'test' ? getTestingAppConfi
 export interface AppConfig {
   sandbox?: {
     originChainId: number
-    forkChainIdPrefix: number
     chainName: string
     mintBalances: {
       etherAmt: NormalizedUnitNumber

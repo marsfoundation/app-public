@@ -11,6 +11,7 @@ import { useStore } from '@/domain/state'
 import { NotRetryableError, retry } from '@/utils/promises'
 import { getTimestampInSeconds } from '@/utils/time'
 
+import { SANDBOX_NETWORKS_CHAIN_ID_PREFIX } from '@/config/consts'
 import { SandboxMode } from '../types'
 import { createSandbox, getChainIdWithPrefix } from './createSandbox'
 
@@ -46,7 +47,7 @@ export function useSandboxDialog(mode: SandboxMode): UseSandboxDialogResult {
     }
 
     const createdAt = new Date()
-    const forkChainId = getChainIdWithPrefix(sandboxConfig.forkChainIdPrefix, getTimestampInSeconds(createdAt))
+    const forkChainId = getChainIdWithPrefix(SANDBOX_NETWORKS_CHAIN_ID_PREFIX, getTimestampInSeconds(createdAt))
 
     if (mode === 'ephemeral') {
       const privateKey = generatePrivateKey()

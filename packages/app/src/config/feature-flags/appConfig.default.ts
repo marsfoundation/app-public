@@ -9,7 +9,6 @@ export function getDefaultAppConfig(): AppConfig {
   return {
     sandbox: featureFlag('VITE_FEATURE_SANDBOX') && {
       originChainId: mainnet.id,
-      forkChainIdPrefix: 3030,
       chainName: 'Sandbox Mode',
 
       mintBalances: {

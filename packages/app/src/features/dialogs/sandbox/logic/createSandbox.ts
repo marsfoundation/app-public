@@ -2,7 +2,7 @@ import { Address, parseEther, parseUnits } from 'viem'
 
 import { apiUrl } from '@/config/consts'
 import { AppConfig } from '@/config/feature-flags'
-import { createTenderlyFork, createTenderlyVnet } from '@/domain/sandbox/createTenderlyFork'
+import { createTenderlyVnet } from '@/domain/sandbox/createTenderlyFork'
 import { publicTenderlyActions } from '@/domain/sandbox/publicTenderlyActions'
 import { BaseUnitNumber } from '@/domain/types/NumericValues'
 
