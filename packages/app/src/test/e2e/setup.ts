@@ -64,7 +64,7 @@ export async function setup<K extends keyof typeof paths, T extends 'not-connect
     await injectWalletConfiguration(page, account)
 
     if (assetBalances) {
-      for (const [tokenName, balance] of Object.entries(assetBalances)) {
+      const promises = Object.entries(assetBalances).map(async ([tokenName, balance]) => {
         if (tokenName === 'ETH' || tokenName === 'XDAI') {
           await publicTenderlyActions.setBalance(
             forkContext.forkUrl,
@@ -81,7 +81,9 @@ export async function setup<K extends keyof typeof paths, T extends 'not-connect
             ),
           )
         }
-      }
+      })
+
+      await Promise.all(promises)
     }
   }
 
