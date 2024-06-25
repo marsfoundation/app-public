@@ -1,7 +1,6 @@
 import { test } from '@playwright/test'
 import { mainnet } from 'viem/chains'
 
-import { publicTenderlyActions } from '@/domain/sandbox/publicTenderlyActions'
 import { ActionsPageObject } from '@/features/actions/ActionsContainer.PageObject'
 import { BorrowPageObject } from '@/pages/Borrow.PageObject'
 import { DashboardPageObject } from '@/pages/Dashboard.PageObject'
@@ -10,6 +9,7 @@ import { setup } from '@/test/e2e/setup'
 import { setupFork } from '@/test/e2e/setupFork'
 import { screenshot } from '@/test/e2e/utils'
 
+import { tenderlyRpcActions } from '@/domain/tenderly/TenderlyRpcActions'
 import { DialogPageObject } from '../common/Dialog.PageObject'
 
 const headerRegExp = /Deposit */
@@ -383,7 +383,7 @@ test.describe('Deposit dialog', () => {
 
       const depositDialog = new DialogPageObject(page, headerRegExp)
       await depositDialog.clickMaxAmountAction()
-      await publicTenderlyActions.evmIncreaseTime(fork.forkUrl, 5 * 60)
+      await tenderlyRpcActions.evmIncreaseTime(fork.forkUrl, 5 * 60)
 
       const actionsContainer = new ActionsPageObject(depositDialog.locatePanelByHeader('Actions'))
       await actionsContainer.acceptAllActionsAction(2)

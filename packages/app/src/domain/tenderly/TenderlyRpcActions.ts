@@ -1,13 +1,12 @@
 import { BaseUnitNumber } from '@/domain/types/NumericValues'
 import { toHex } from '@/utils/bigNumber'
 
-import { request } from './request'
+import { request } from '../sandbox/request'
 
 async function setBalance(forkUrl: string, address: string, balance: BaseUnitNumber): Promise<void> {
   await request(forkUrl, 'tenderly_setBalance', [address, toHex(balance)])
 }
 
-//@note: due to Tenderly race conditions this can't be parallelized
 async function setTokenBalance(
   forkUrl: string,
   tokenAddress: string,
@@ -29,7 +28,7 @@ async function evmIncreaseTime(forkUrl: string, seconds: number): Promise<void> 
   await request(forkUrl, 'evm_increaseTime', [seconds])
 }
 
-export const publicTenderlyActions = {
+export const tenderlyRpcActions = {
   setBalance,
   setTokenBalance,
   snapshot,

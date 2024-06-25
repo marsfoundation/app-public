@@ -1,8 +1,7 @@
 import { test } from '@playwright/test'
 
-import { publicTenderlyActions } from '@/domain/sandbox/publicTenderlyActions'
-
-import { TestTenderlyClient } from './TestTenderlyClient'
+import { tenderlyRpcActions } from '@/domain/tenderly/TenderlyRpcActions'
+import { TestTenderlyClient } from '../../domain/tenderly/TestTenderlyClient'
 import { processEnv } from './processEnv'
 
 export interface ForkContext {
@@ -32,7 +31,7 @@ export function setupFork({ blockNumber, chainId, simulationDateOverride }: Setu
   const tenderlyAccount = processEnv('TENDERLY_ACCOUNT')
   const tenderlyProject = processEnv('TENDERLY_PROJECT')
 
-  const tenderlyClient = new TestTenderlyClient({ apiKey, tenderlyAccount, tenderlyProject })
+  const tenderlyClient = new TestTenderlyClient({ apiKey, account: tenderlyAccount, project: tenderlyProject })
 
   const forkContext: ForkContext = {
     tenderlyClient,
@@ -45,20 +44,19 @@ export function setupFork({ blockNumber, chainId, simulationDateOverride }: Setu
 
   test.beforeAll(async () => {
     forkContext.forkUrl = await tenderlyClient.createFork({
-      namePrefix: 'e2e_test',
       blockNumber,
       originChainId: chainId,
       forkChainId: chainId,
     })
 
     const deltaTimeForward = Math.floor((simulationDate.getTime() - Date.now()) / 1000)
-    await publicTenderlyActions.evmIncreaseTime(forkContext.forkUrl, deltaTimeForward)
+    await tenderlyRpcActions.evmIncreaseTime(forkContext.forkUrl, deltaTimeForward)
 
-    forkContext.initialSnapshotId = await publicTenderlyActions.snapshot(forkContext.forkUrl)
+    forkContext.initialSnapshotId = await tenderlyRpcActions.snapshot(forkContext.forkUrl)
   })
 
   test.beforeEach(async () => {
-    await publicTenderlyActions.revertToSnapshot(forkContext.forkUrl, forkContext.initialSnapshotId)
+    await tenderlyRpcActions.revertToSnapshot(forkContext.forkUrl, forkContext.initialSnapshotId)
   })
 
   test.afterAll(async () => {

@@ -3,9 +3,9 @@ import { generatePath } from 'react-router-dom'
 import { Address, parseEther, parseUnits } from 'viem'
 
 import { paths } from '@/config/paths'
-import { publicTenderlyActions } from '@/domain/sandbox/publicTenderlyActions'
 import { BaseUnitNumber } from '@/domain/types/NumericValues'
 
+import { tenderlyRpcActions } from '@/domain/tenderly/TenderlyRpcActions'
 import { AssetsInTests, TOKENS_ON_FORK } from './constants'
 import { injectFixedDate, injectNetworkConfiguration, injectWalletConfiguration } from './injectSetup'
 import { ForkContext } from './setupFork'
@@ -66,13 +66,13 @@ export async function setup<K extends keyof typeof paths, T extends 'not-connect
     if (assetBalances) {
       const promises = Object.entries(assetBalances).map(async ([tokenName, balance]) => {
         if (tokenName === 'ETH' || tokenName === 'XDAI') {
-          await publicTenderlyActions.setBalance(
+          await tenderlyRpcActions.setBalance(
             forkContext.forkUrl,
             account.address,
             BaseUnitNumber(parseEther(balance.toString())),
           )
         } else {
-          await publicTenderlyActions.setTokenBalance(
+          await tenderlyRpcActions.setTokenBalance(
             forkContext.forkUrl,
             (TOKENS_ON_FORK as any)[forkContext.chainId][tokenName].address,
             account.address,

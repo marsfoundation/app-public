@@ -1,9 +1,8 @@
 import { Address, parseEther, parseUnits } from 'viem'
 
-import { apiUrl } from '@/config/consts'
 import { AppConfig } from '@/config/feature-flags'
-import { createTenderlyVnet } from '@/domain/sandbox/createTenderlyFork'
-import { publicTenderlyActions } from '@/domain/sandbox/publicTenderlyActions'
+import { createTenderlyFork } from '@/domain/sandbox/createTenderlyFork'
+import { tenderlyRpcActions } from '@/domain/tenderly/TenderlyRpcActions'
 import { BaseUnitNumber } from '@/domain/types/NumericValues'
 
 export async function createSandbox(opts: {
@@ -12,11 +11,10 @@ export async function createSandbox(opts: {
   userAddress: Address
   mintBalances: NonNullable<AppConfig['sandbox']>['mintBalances']
 }): Promise<string> {
-  const { rpcUrl: forkUrl } = await createTenderlyVnet({
+  const { rpcUrl: forkUrl } = await createTenderlyFork({
     namePrefix: 'sandbox',
     originChainId: opts.originChainId,
     forkChainId: opts.forkChainId,
-    apiUrl: `${apiUrl}/sandbox/create`,
   })
 
   // mint token and ether balances in parallel
@@ -24,9 +22,9 @@ export async function createSandbox(opts: {
     ...Object.values(opts.mintBalances.tokens).map((token) => {
       const units = BaseUnitNumber(parseUnits(opts.mintBalances.tokenAmt.toString(), token.decimals))
 
-      return publicTenderlyActions.setTokenBalance(forkUrl, token.address, opts.userAddress, units)
+      return tenderlyRpcActions.setTokenBalance(forkUrl, token.address, opts.userAddress, units)
     }),
-    publicTenderlyActions.setBalance(
+    tenderlyRpcActions.setBalance(
       forkUrl,
       opts.userAddress,
       BaseUnitNumber(parseEther(opts.mintBalances.etherAmt.toString())),
