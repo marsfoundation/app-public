@@ -10,6 +10,7 @@ export async function request(
 export async function request(forkUrl: string, method: 'evm_snapshot', params: []): Promise<string>
 export async function request(forkUrl: string, method: 'evm_revert', params: [string]): Promise<void>
 export async function request(forkUrl: string, method: 'evm_increaseTime', params: [number]): Promise<void>
+export async function request(forkUrl: string, method: 'evm_setNextBlockTimestamp', params: [number]): Promise<void>
 export async function request(forkUrl: string, method: string, params: any[]): Promise<any> {
   const id = randomInt().toString()
 

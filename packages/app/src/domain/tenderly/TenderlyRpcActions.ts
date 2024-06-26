@@ -28,10 +28,15 @@ async function evmIncreaseTime(forkUrl: string, seconds: number): Promise<void> 
   await request(forkUrl, 'evm_increaseTime', [seconds])
 }
 
+async function evmSetNextBlockTimestamp(forkUrl: string, timestamp: number): Promise<void> {
+  await request(forkUrl, 'evm_setNextBlockTimestamp', [timestamp])
+}
+
 export const tenderlyRpcActions = {
   setBalance,
   setTokenBalance,
   snapshot,
   revertToSnapshot,
   evmIncreaseTime,
+  evmSetNextBlockTimestamp,
 }
