@@ -10,6 +10,7 @@ import { SavingsDAI } from '../components/savings-dai/SavingsDAI'
 import { SavingsOpportunity } from '../components/savings-opportunity/SavingsOpportunity'
 import { SavingsOpportunityNoCash } from '../components/savings-opportunity/SavingsOpportunityNoCash'
 import { Projections } from '../types'
+import { Dev, useMulticallBlockTimestamp } from './dev'
 
 export interface SavingsViewProps {
   APY: Percentage
@@ -44,6 +45,7 @@ export function SavingsView({
 
   return (
     <PageLayout>
+      <Dev />
       <PageHeader />
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {displaySavingsDai && (

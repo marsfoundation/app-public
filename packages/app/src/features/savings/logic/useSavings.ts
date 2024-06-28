@@ -44,6 +44,7 @@ export function useSavings(): UseSavingsResults {
   const { timestamp, timestampInMs } = useTimestamp({
     refreshIntervalInMs: savingsInfo?.supportsRealTimeInterestAccrual ? stepInMs : undefined,
   })
+  // console.log('timestamp', new Date(timestampInMs).toISOString())
   const openDialog = useOpenDialog()
 
   if (!savingsInfo) {

@@ -6,6 +6,8 @@ import { BasePageObject } from '@/test/e2e/BasePageObject'
 import { isPage } from '@/test/e2e/utils'
 import { testIds } from '@/ui/utils/testIds'
 
+import { tenderlyRpcActions } from '@/domain/tenderly/TenderlyRpcActions'
+import { sleep } from '@/utils/promises'
 import { ActionType } from './logic/types'
 
 export class ActionsPageObject extends BasePageObject {
@@ -27,11 +29,17 @@ export class ActionsPageObject extends BasePageObject {
   }
 
   // #region actions
-  async acceptAllActionsAction(expectedNumberOfActions: number): Promise<void> {
+  async acceptAllActionsAction(expectedNumberOfActions: number, forkContext?: any): Promise<void> {
     for (let index = 0; index < expectedNumberOfActions; index++) {
       const row = this.region.getByTestId(testIds.actions.row(index))
 
       await row.getByRole('button', { name: actionButtonRegex }).click()
+
+      await tenderlyRpcActions.evmSetNextBlockTimestamp(
+        forkContext.forkUrl,
+        forkContext.simulationDate.getTime() / 1000,
+      )
+      await sleep(400)
     }
   }
 

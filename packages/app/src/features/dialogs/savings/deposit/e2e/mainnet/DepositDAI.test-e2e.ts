@@ -1,8 +1,10 @@
+import { tenderlyRpcActions } from '@/domain/tenderly/TenderlyRpcActions'
 import { ActionsPageObject } from '@/features/actions/ActionsContainer.PageObject'
 import { SavingsPageObject } from '@/pages/Savings.PageObject'
 import { DEFAULT_BLOCK_NUMBER } from '@/test/e2e/constants'
 import { setup } from '@/test/e2e/setup'
 import { setupFork } from '@/test/e2e/setupFork'
+import { sleep } from '@/utils/promises'
 import { test } from '@playwright/test'
 import { mainnet } from 'viem/chains'
 import { SavingsDialogPageObject } from '../../../common/e2e/SavingsDialog.PageObject'
@@ -18,7 +20,7 @@ test.describe('Deposit DAI on Mainnet', () => {
       account: {
         type: 'connected',
         assetBalances: {
-          ETH: 1,
+          // ETH: 1,
           DAI: 10_000,
         },
       },
@@ -61,7 +63,14 @@ test.describe('Deposit DAI on Mainnet', () => {
 
   test('executes deposit', async () => {
     const actionsContainer = new ActionsPageObject(depositDialog.locatePanelByHeader('Actions'))
-    await actionsContainer.acceptAllActionsAction(2)
+
+    await actionsContainer.acceptActionAtIndex(0)
+    await sleep(2000)
+    await tenderlyRpcActions.evmSetNextBlockTimestamp(fork.forkUrl, 1699871817)
+
+    await actionsContainer.acceptActionAtIndex(1)
+    await sleep(2000)
+    await tenderlyRpcActions.evmSetNextBlockTimestamp(fork.forkUrl, 1699871827)
 
     await depositDialog.expectSuccessPage()
     await depositDialog.clickBackToSavingsButton()

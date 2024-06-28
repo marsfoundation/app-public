@@ -84,7 +84,7 @@ export type AssetsInTests = 'ETH' | 'XDAI' | NonNativeTokens
 // @note At this block number:
 // DAI oracle returns exactly 1
 // GNO is offboarded
-export const DEFAULT_BLOCK_NUMBER = 19092430n
+export const DEFAULT_BLOCK_NUMBER = 18562430n
 export const GNOSIS_DEFAULT_BLOCK_NUMBER = 34543308n
 
 export const PSM_ACTIONS_DEPLOYED = 20026000n

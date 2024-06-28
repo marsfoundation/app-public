@@ -84,6 +84,11 @@ export async function setup<K extends keyof typeof paths, T extends 'not-connect
       })
 
       await Promise.all(promises)
+
+      await tenderlyRpcActions.evmSetNextBlockTimestamp(
+        forkContext.forkUrl,
+        forkContext.simulationDate.getTime() / 1000,
+      )
     }
   }
 

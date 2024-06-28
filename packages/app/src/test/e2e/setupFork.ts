@@ -1,6 +1,8 @@
 import { test } from '@playwright/test'
 
 import { tenderlyRpcActions } from '@/domain/tenderly/TenderlyRpcActions'
+import { http, createPublicClient } from 'viem'
+import { mainnet } from 'viem/chains'
 import { TestTenderlyClient } from '../../domain/tenderly/TestTenderlyClient'
 import { processEnv } from './processEnv'
 
@@ -25,8 +27,7 @@ export interface SetupForkOptions {
   simulationDateOverride?: Date
 }
 
-export function setupFork({ blockNumber, chainId, simulationDateOverride }: SetupForkOptions): ForkContext {
-  const simulationDate = simulationDateOverride ?? _simulationDate
+export function setupFork({ blockNumber, chainId }: SetupForkOptions): ForkContext {
   const apiKey = processEnv('TENDERLY_API_KEY')
   const tenderlyAccount = processEnv('TENDERLY_ACCOUNT')
   const tenderlyProject = processEnv('TENDERLY_PROJECT')
@@ -38,7 +39,7 @@ export function setupFork({ blockNumber, chainId, simulationDateOverride }: Setu
     // we lie to typescript here, because it will be set in beforeAll
     forkUrl: undefined as any,
     initialSnapshotId: undefined as any,
-    simulationDate,
+    simulationDate: undefined as any,
     chainId,
   }
 
@@ -49,8 +50,16 @@ export function setupFork({ blockNumber, chainId, simulationDateOverride }: Setu
       forkChainId: chainId,
     })
 
-    const deltaTimeForward = Math.floor((simulationDate.getTime() - Date.now()) / 1000)
-    await tenderlyRpcActions.evmIncreaseTime(forkContext.forkUrl, deltaTimeForward)
+    const client = createPublicClient({
+      chain: mainnet,
+      transport: http(forkContext.forkUrl),
+    })
+
+    // set timestamps
+    const block = await client.getBlock({ blockNumber: blockNumber - 1n })
+    forkContext.simulationDate = new Date(Number(block.timestamp) * 1000)
+    console.log('Fork created at block', blockNumber, 'on', forkContext.simulationDate.toISOString())
+    tenderlyRpcActions.evmSetNextBlockTimestamp(forkContext.forkUrl, Number(block.timestamp))
 
     forkContext.initialSnapshotId = await tenderlyRpcActions.snapshot(forkContext.forkUrl)
   })

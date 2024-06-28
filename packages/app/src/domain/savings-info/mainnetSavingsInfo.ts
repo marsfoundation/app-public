@@ -71,6 +71,7 @@ export class MainnetSavingsInfo implements SavingsInfo {
     this.potParams = potParams
     this.currentTimestamp = currentTimestamp
     this.DSR = Percentage(pow(fromRay(potParams.dsr), 60 * 60 * 24 * 365).minus(1), true)
+    console.log('MainnetSavingsInfo', new Date(currentTimestamp * 1000).toISOString())
   }
 
   get apy(): Percentage {
