@@ -7,12 +7,21 @@ import { NotConnected } from './NotConnected'
 import { NotFound } from './NotFound'
 import { UnknownError } from './UnknownError'
 
-interface RouterErrorFallbackProps {
+export interface RouterErrorFallbackProps {
   fullScreen?: boolean
 }
 
 export function RouterErrorFallback({ fullScreen }: RouterErrorFallbackProps) {
   const error = useRouteError()
+
+  return <ErrorFallback error={error} fullScreen={fullScreen} />
+}
+
+export interface ErrorFallbackProps {
+  fullScreen?: boolean
+  error?: any
+}
+export function ErrorFallback({ fullScreen, error }: ErrorFallbackProps) {
   if (error instanceof NotConnectedError) {
     return <NotConnected />
   }

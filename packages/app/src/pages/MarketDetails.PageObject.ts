@@ -65,5 +65,10 @@ export class MarketDetailsPageObject extends BasePageObject {
   async expectDebt(value: string): Promise<void> {
     await expect(this.page.getByTestId(testIds.marketDetails.collateralStatusPanel.debt)).toHaveText(value)
   }
+
+  async expect404(): Promise<void> {
+    await expect(this.page.getByText('404')).toBeVisible()
+    await expect(this.page.getByText('The requested page could not be found.')).toBeVisible()
+  }
   // #endregion
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { captureError } from '@/utils/sentry'
 
-import { ErrorFallback } from './ErrorFallback'
+import { ErrorView } from './ErrorView'
 
 interface UnknownErrorProps {
   error: any
@@ -18,5 +18,5 @@ export function UnknownError({ error, fullScreen }: UnknownErrorProps) {
     captureError(error)
   }, [])
 
-  return <ErrorFallback onReload={() => navigate(0)} fullScreen={fullScreen} />
+  return <ErrorView onReload={() => navigate(0)} fullScreen={fullScreen} />
 }

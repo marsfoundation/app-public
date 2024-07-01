@@ -1,4 +1,4 @@
 export { ErrorBoundary } from './ErrorBoundary'
-export { ErrorFallback } from './ErrorFallback'
+export { ErrorView } from './ErrorView'
 export { RouterErrorFallback } from './RouterErrorFallback'
 export { TopLevelErrorBoundary } from './TopLevelErrorBoundary'

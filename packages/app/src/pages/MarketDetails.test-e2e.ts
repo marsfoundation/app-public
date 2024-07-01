@@ -215,4 +215,34 @@ test.describe('Market details', () => {
       await marketDetailsPage.expectDebtCeiling('$50M')
     })
   })
+
+  test.describe('Errors', () => {
+    const NOT_A_RESERVE = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+
+    test('displays 404 page for unknown chain', async ({ page }) => {
+      await setup(page, fork, {
+        initialPage: 'marketDetails',
+        initialPageParams: { asset: DAI, chainId: '12345' },
+        account: {
+          type: 'not-connected',
+        },
+      })
+
+      const marketDetailsPage = new MarketDetailsPageObject(page)
+      await marketDetailsPage.expect404()
+    })
+
+    test('displays 404 page for unknown asset', async ({ page }) => {
+      await setup(page, fork, {
+        initialPage: 'marketDetails',
+        initialPageParams: { asset: NOT_A_RESERVE, chainId: fork.chainId.toString() },
+        account: {
+          type: 'not-connected',
+        },
+      })
+
+      const marketDetailsPage = new MarketDetailsPageObject(page)
+      await marketDetailsPage.expect404()
+    })
+  })
 })

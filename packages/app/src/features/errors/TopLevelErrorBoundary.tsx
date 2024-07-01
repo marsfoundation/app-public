@@ -1,7 +1,7 @@
 import { ErrorBoundary } from '@sentry/react'
 import { ReactNode } from 'react'
 
-import { ErrorFallback } from './ErrorFallback'
+import { ErrorView } from './ErrorView'
 
 interface TopLevelErrorBoundary {
   children: ReactNode
@@ -9,7 +9,7 @@ interface TopLevelErrorBoundary {
 
 export function TopLevelErrorBoundary({ children }: TopLevelErrorBoundary) {
   return (
-    <ErrorBoundary fallback={<ErrorFallback onReload={() => window.location.reload()} fullScreen />}>
+    <ErrorBoundary fallback={<ErrorView onReload={() => window.location.reload()} fullScreen />}>
       {children}
     </ErrorBoundary>
   )

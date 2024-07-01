@@ -2,12 +2,12 @@ import { Button } from '@/ui/atoms/button/Button'
 import { Typography } from '@/ui/atoms/typography/Typography'
 import { ErrorLayout } from '@/ui/layouts/ErrorLayout'
 
-export interface ErrorFallbackProps {
+export interface ErrorViewProps {
   onReload: () => void
   fullScreen?: boolean
 }
 
-export function ErrorFallback({ onReload, fullScreen }: ErrorFallbackProps) {
+export function ErrorView({ onReload, fullScreen }: ErrorViewProps) {
   return (
     <ErrorLayout fullScreen={fullScreen}>
       <Typography variant="h1">Oops</Typography>

@@ -2,7 +2,7 @@ import { Component, ReactNode } from 'react'
 
 export interface ErrorBoundaryProps {
   children: ReactNode
-  fallback: ReactNode
+  fallback: (({ error }: { error: any }) => ReactNode) | ReactNode
 }
 
 export type ErrorBoundaryState =
@@ -29,6 +29,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   render() {
     if (this.state.hasError) {
+      if (!this.props.fallback) {
+        throw this.state.error
+      }
+
+      if (typeof this.props.fallback === 'function') {
+        return this.props.fallback({ error: this.state.error })
+      }
+
       return this.props.fallback
     }
 
