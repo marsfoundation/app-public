@@ -19,7 +19,7 @@ interface UseSexyDaiWithdrawArgs {
 
 // @note: 'withdrawXDAI' function allows user to withdraw a specified amount
 // of xDAI from the vault by burning the corresponding sDAI amount.
-// Without optional receiver, assets owner will be used as receiver.
+// Without optional receiver, shares owner will be used as receiver.
 // Providing receiver will allow to withdraw and send assets to a target address in one transaction.
 // Example: Withdraw X xDAI by burning Y sDAI (useful is one wants to withdraw exact number of xDAI)
 export function useSexyDaiWithdraw({

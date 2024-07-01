@@ -18,7 +18,7 @@ export interface UseSexyDaiRedeemArgs {
 }
 
 // @note: 'redeemXDAI' vault function allows user to redeem a specified amount of sDAI in exchange for the xDAI.
-// Without optional receiver, xDAI owner will be used as receiver.
+// Without optional receiver, shares owner will be used as receiver.
 // Providing receiver will allow to redeem sDAI and send xDAI to a target address in one transaction.
 // Example: Redeem X sDAI to get Y xDAI (useful if one wants to withdraw all xDAI)
 export function useSexyDaiRedeem({

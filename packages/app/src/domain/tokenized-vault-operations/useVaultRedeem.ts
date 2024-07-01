@@ -17,7 +17,7 @@ interface UseVaultRedeemArgs {
 
 // @note: 'redeem' vault function allows user to redeem a specified
 // amount of shares in exchange for the underlying asset.
-// Without optional receiver, assets owner will be used as receiver.
+// Without optional receiver, shares owner will be used as receiver.
 // Providing receiver will allow to redeem shares and send assets to a target address in one transaction.
 // Example: Redeem X sDAI to get Y DAI (useful if one wants to withdraw all DAI)
 export function useVaultRedeem({

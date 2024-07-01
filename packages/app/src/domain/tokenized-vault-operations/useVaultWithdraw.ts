@@ -17,7 +17,7 @@ interface UseVaultWithdrawArgs {
 
 // @note: 'withdraw' vault function allows user to withdraw a specified amount
 // of the underlying asset from the vault by burning the corresponding shares.
-// Without optional receiver, assets owner will be used as receiver.
+// Without optional receiver, shares owner will be used as receiver.
 // Providing receiver will allow to withdraw and send assets to a target address in one transaction.
 // Example: Withdraw X DAI by burning Y sDAI (useful is one want to withdraw exact number of DAI)
 export function useVaultWithdraw({

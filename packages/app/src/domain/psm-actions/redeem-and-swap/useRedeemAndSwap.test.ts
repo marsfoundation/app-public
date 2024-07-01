@@ -11,17 +11,18 @@ import { useRedeemAndSwap } from './useRedeemAndSwap'
 
 const gem = getMockToken({ address: testAddresses.token, decimals: 6 })
 const assetsToken = getMockToken({ address: testAddresses.token2, decimals: 18 })
-const account = testAddresses.alice
+const owner = testAddresses.alice
+const receiver = testAddresses.bob
 const sharesAmount = BaseUnitNumber(1)
 const savingsToken = testAddresses.token3
 const assetsAmount = BaseUnitNumber(1e18)
 
 const hookRenderer = setupHookRenderer({
   hook: useRedeemAndSwap,
-  account,
+  account: owner,
   handlers: [
     handlers.chainIdCall({ chainId: mainnet.id }),
-    handlers.balanceCall({ balance: 0n, address: account }),
+    handlers.balanceCall({ balance: 0n, address: owner }),
     handlers.contractCall({
       to: psmActionsAddress[mainnet.id],
       abi: psmActionsAbi,
@@ -66,18 +67,46 @@ describe(useRedeemAndSwap.name, () => {
 
   it('redeems using psm actions', async () => {
     const { result } = hookRenderer({
+      extraHandlers: [
+        handlers.contractCall({
+          to: psmActionsAddress[mainnet.id],
+          abi: psmActionsAbi,
+          functionName: 'redeemAndSwap',
+          args: [owner, toBigInt(sharesAmount), toBigInt(assetsAmount.dividedBy(1e12))],
+          from: owner,
+          result: 1n,
+        }),
+        handlers.mineTransaction(),
+      ],
+    })
+
+    await waitFor(() => {
+      expect(result.current.status.kind).toBe('ready')
+    })
+    expect((result.current as any).error).toBeUndefined()
+
+    result.current.write()
+
+    await waitFor(() => {
+      expect(result.current.status.kind).toBe('success')
+    })
+  })
+
+  it('redeems using psm actions with custom receiver', async () => {
+    const { result } = hookRenderer({
       args: {
         gem,
         assetsToken,
         sharesAmount,
+        receiver,
       },
       extraHandlers: [
         handlers.contractCall({
           to: psmActionsAddress[mainnet.id],
           abi: psmActionsAbi,
           functionName: 'redeemAndSwap',
-          args: [account, toBigInt(sharesAmount), toBigInt(assetsAmount.dividedBy(1e12))],
-          from: account,
+          args: [receiver, toBigInt(sharesAmount), toBigInt(assetsAmount.dividedBy(1e12))],
+          from: owner,
           result: 1n,
         }),
         handlers.mineTransaction(),
