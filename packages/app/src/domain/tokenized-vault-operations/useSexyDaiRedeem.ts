@@ -12,22 +12,27 @@ import { balancesQueryKey } from '../wallet/balances'
 export interface UseSexyDaiRedeemArgs {
   sDai: CheckedAddress
   sharesAmount: BaseUnitNumber
+  receiver?: CheckedAddress
   onTransactionSettled?: () => void
   enabled?: boolean
 }
 
 // @note: 'redeemXDAI' vault function allows user to redeem a specified amount of sDAI in exchange for the xDAI.
+// Without optional receiver, shares owner will be used as receiver.
+// Providing receiver will allow to redeem sDAI and send xDAI to a target address in one transaction.
 // Example: Redeem X sDAI to get Y xDAI (useful if one wants to withdraw all xDAI)
 export function useSexyDaiRedeem({
   sDai,
   sharesAmount,
+  receiver: _receiver,
   onTransactionSettled,
-  enabled: _enabled = true,
+  enabled = true,
 }: UseSexyDaiRedeemArgs): ReturnType<typeof useWrite> {
   const client = useQueryClient()
   const wagmiConfig = useConfig()
 
-  const { address: receiver } = useAccount()
+  const { address: owner } = useAccount()
+  const receiver = _receiver || owner
 
   const config = ensureConfigTypes({
     address: savingsXDaiAdapterAddress[gnosis.id],
@@ -35,24 +40,23 @@ export function useSexyDaiRedeem({
     functionName: 'redeemXDAI',
     args: [toBigInt(sharesAmount), receiver!],
   })
-  const enabled = _enabled && sharesAmount.gt(0) && !!receiver
 
   return useWrite(
     {
       ...config,
-      enabled,
+      enabled: enabled && sharesAmount.gt(0) && !!receiver,
     },
     {
       onTransactionSettled: async () => {
         void client.invalidateQueries({
-          queryKey: balancesQueryKey({ chainId: gnosis.id, account: receiver }),
+          queryKey: balancesQueryKey({ chainId: gnosis.id, account: owner }),
         })
         void client.invalidateQueries({
           queryKey: allowance({
             wagmiConfig,
             chainId: gnosis.id,
             token: sDai,
-            account: receiver!,
+            account: owner!,
             spender: savingsXDaiAdapterAddress[gnosis.id],
           }).queryKey,
         })

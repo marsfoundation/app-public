@@ -1,5 +1,6 @@
 import { psmActionsConfig } from '@/config/contracts-generated'
 import { useContractAddress } from '@/domain/hooks/useContractAddress'
+import { CheckedAddress } from '@/domain/types/CheckedAddress'
 import { toBigInt } from '@/utils/bigNumber'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAccount, useChainId, useConfig } from 'wagmi'
@@ -13,19 +14,23 @@ export interface UseRedeemAndSwapArgs {
   gem: Token
   assetsToken: Token
   sharesAmount: BaseUnitNumber
+  receiver?: CheckedAddress
   onTransactionSettled?: () => void
   enabled?: boolean
 }
 
 // @note: Redeem a specified amount of `savingsToken` from the `savingsToken`
 // for `dai` and swap for `gem` in the PSM. Use this if you want to withdraw everything.
+// Without optional receiver, shares owner will be used as receiver.
+// Providing receiver will allow to redeem shares, swap, and send gem tokens to a target address in one transaction.
 // @note: Assumes PSM swap rate between `dai` and `gem` is 1:1.
 export function useRedeemAndSwap({
   gem,
   assetsToken,
   sharesAmount: _sharesAmount,
+  receiver: _receiver,
   onTransactionSettled,
-  enabled: _enabled = true,
+  enabled = true,
 }: UseRedeemAndSwapArgs): ReturnType<typeof useWrite> {
   const client = useQueryClient()
   const wagmiConfig = useConfig()
@@ -33,7 +38,9 @@ export function useRedeemAndSwap({
 
   const psmActions = useContractAddress(psmActionsConfig.address)
 
-  const { address: receiver } = useAccount()
+  const { address: owner } = useAccount()
+  const receiver = _receiver || owner
+
   const sharesAmount = toBigInt(_sharesAmount)
   const { data: gemMinAmountOut } = useQuery(
     gemMinAmountOutQueryOptions({
@@ -52,17 +59,16 @@ export function useRedeemAndSwap({
     functionName: 'redeemAndSwap',
     args: [receiver!, sharesAmount, gemMinAmountOut!],
   })
-  const enabled = _enabled && _sharesAmount.gt(0) && !!receiver && !!gemMinAmountOut
 
   return useWrite(
     {
       ...config,
-      enabled,
+      enabled: enabled && _sharesAmount.gt(0) && !!receiver && !!gemMinAmountOut,
     },
     {
       onTransactionSettled: async () => {
         void client.invalidateQueries({
-          queryKey: balancesQueryKey({ chainId, account: receiver }),
+          queryKey: balancesQueryKey({ chainId, account: owner }),
         })
 
         onTransactionSettled?.()

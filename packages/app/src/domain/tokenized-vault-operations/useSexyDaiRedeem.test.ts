@@ -8,15 +8,16 @@ import { gnosis } from 'viem/chains'
 import { BaseUnitNumber } from '../types/NumericValues'
 import { useSexyDaiRedeem } from './useSexyDaiRedeem'
 
-const account = testAddresses.alice
+const owner = testAddresses.alice
+const receiver = testAddresses.bob
 const sharesAmount = BaseUnitNumber(10)
 const sDai = testAddresses.token
 
 const hookRenderer = setupHookRenderer({
   hook: useSexyDaiRedeem,
-  account,
+  account: owner,
   chain: gnosis,
-  handlers: [handlers.chainIdCall({ chainId: gnosis.id }), handlers.balanceCall({ balance: 0n, address: account })],
+  handlers: [handlers.chainIdCall({ chainId: gnosis.id }), handlers.balanceCall({ balance: 0n, address: owner })],
   args: { sDai, sharesAmount },
 })
 
@@ -52,8 +53,36 @@ describe(useSexyDaiRedeem.name, () => {
           to: savingsXDaiAdapterAddress[gnosis.id],
           abi: savingsXDaiAdapterAbi,
           functionName: 'redeemXDAI',
-          args: [toBigInt(sharesAmount), account],
-          from: account,
+          args: [toBigInt(sharesAmount), owner],
+          from: owner,
+          result: 1n,
+        }),
+        handlers.mineTransaction(),
+      ],
+    })
+
+    await waitFor(() => {
+      expect(result.current.status.kind).toBe('ready')
+    })
+    expect((result.current as any).error).toBeUndefined()
+
+    result.current.write()
+
+    await waitFor(() => {
+      expect(result.current.status.kind).toBe('success')
+    })
+  })
+
+  it('redeems xDAI with custom receiver', async () => {
+    const { result } = hookRenderer({
+      args: { sharesAmount, receiver, sDai },
+      extraHandlers: [
+        handlers.contractCall({
+          to: savingsXDaiAdapterAddress[gnosis.id],
+          abi: savingsXDaiAdapterAbi,
+          functionName: 'redeemXDAI',
+          args: [toBigInt(sharesAmount), receiver],
+          from: owner,
           result: 1n,
         }),
         handlers.mineTransaction(),

@@ -10,40 +10,45 @@ import { balancesQueryKey } from '../wallet/balances'
 interface UseVaultWithdrawArgs {
   vault: CheckedAddress
   assetsAmount: BaseUnitNumber
+  receiver?: CheckedAddress
   onTransactionSettled?: () => void
   enabled?: boolean
 }
 
 // @note: 'withdraw' vault function allows user to withdraw a specified amount
 // of the underlying asset from the vault by burning the corresponding shares.
+// Without optional receiver, shares owner will be used as receiver.
+// Providing receiver will allow to withdraw and send assets to a target address in one transaction.
 // Example: Withdraw X DAI by burning Y sDAI (useful is one want to withdraw exact number of DAI)
 export function useVaultWithdraw({
   vault,
   assetsAmount,
+  receiver: _receiver,
   onTransactionSettled,
   enabled = true,
 }: UseVaultWithdrawArgs): ReturnType<typeof useWrite> {
   const client = useQueryClient()
   const chainId = useChainId()
 
-  const { address: receiver } = useAccount()
+  const { address: owner } = useAccount()
+  const receiver = _receiver || owner
 
   const config = ensureConfigTypes({
     address: vault,
     abi: erc4626Abi,
     functionName: 'withdraw',
-    args: [toBigInt(assetsAmount), receiver!, receiver!],
+    args: [toBigInt(assetsAmount), receiver!, owner!],
   })
 
   return useWrite(
     {
       ...config,
-      enabled: enabled && assetsAmount.gt(0) && !!receiver,
+      enabled: enabled && assetsAmount.gt(0) && !!receiver && !!owner,
     },
     {
       onTransactionSettled: async () => {
         void client.invalidateQueries({
-          queryKey: balancesQueryKey({ chainId, account: receiver }),
+          queryKey: balancesQueryKey({ chainId, account: owner }),
         })
 
         onTransactionSettled?.()

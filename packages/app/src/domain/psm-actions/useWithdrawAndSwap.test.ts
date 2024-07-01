@@ -10,13 +10,14 @@ import { useWithdrawAndSwap } from './useWithdrawAndSwap'
 
 const gem = getMockToken({ address: testAddresses.token, decimals: 6 })
 const assetsToken = getMockToken({ address: testAddresses.token2, decimals: 18 })
-const account = testAddresses.alice
+const owner = testAddresses.alice
+const receiver = testAddresses.bob
 const gemAmountOut = BaseUnitNumber(10)
 
 const hookRenderer = setupHookRenderer({
   hook: useWithdrawAndSwap,
-  account,
-  handlers: [handlers.chainIdCall({ chainId: mainnet.id }), handlers.balanceCall({ balance: 0n, address: account })],
+  account: owner,
+  handlers: [handlers.chainIdCall({ chainId: mainnet.id }), handlers.balanceCall({ balance: 0n, address: owner })],
   args: { gem, assetsToken, gemAmountOut },
 })
 
@@ -47,14 +48,41 @@ describe(useWithdrawAndSwap.name, () => {
 
   it('withdraws using psm actions', async () => {
     const { result } = hookRenderer({
-      args: { gemAmountOut, gem, assetsToken },
       extraHandlers: [
         handlers.contractCall({
           to: psmActionsAddress[mainnet.id],
           abi: psmActionsAbi,
           functionName: 'withdrawAndSwap',
-          args: [account, toBigInt(gemAmountOut), toBigInt(gemAmountOut.multipliedBy(1e12))],
-          from: account,
+          args: [owner, toBigInt(gemAmountOut), toBigInt(gemAmountOut.multipliedBy(1e12))],
+          from: owner,
+          result: 1n,
+        }),
+        handlers.mineTransaction(),
+      ],
+    })
+
+    await waitFor(() => {
+      expect(result.current.status.kind).toBe('ready')
+    })
+    expect((result.current as any).error).toBeUndefined()
+
+    result.current.write()
+
+    await waitFor(() => {
+      expect(result.current.status.kind).toBe('success')
+    })
+  })
+
+  it('withdraws using psm actions with custom receiver', async () => {
+    const { result } = hookRenderer({
+      args: { gemAmountOut, gem, assetsToken, receiver },
+      extraHandlers: [
+        handlers.contractCall({
+          to: psmActionsAddress[mainnet.id],
+          abi: psmActionsAbi,
+          functionName: 'withdrawAndSwap',
+          args: [receiver, toBigInt(gemAmountOut), toBigInt(gemAmountOut.multipliedBy(1e12))],
+          from: owner,
           result: 1n,
         }),
         handlers.mineTransaction(),
