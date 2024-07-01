@@ -10,25 +10,30 @@ import { BaseUnitNumber } from '../types/NumericValues'
 import { balancesQueryKey } from '../wallet/balances'
 
 interface UseSexyDaiWithdrawArgs {
-  assetsAmount: BaseUnitNumber
   sDai: CheckedAddress
+  assetsAmount: BaseUnitNumber
+  receiver?: CheckedAddress
   onTransactionSettled?: () => void
   enabled?: boolean
 }
 
 // @note: 'withdrawXDAI' function allows user to withdraw a specified amount
 // of xDAI from the vault by burning the corresponding sDAI amount.
+// Without optional receiver, assets owner will be used as receiver.
+// Providing receiver will allow to withdraw and send assets to a target address in one transaction.
 // Example: Withdraw X xDAI by burning Y sDAI (useful is one wants to withdraw exact number of xDAI)
 export function useSexyDaiWithdraw({
-  assetsAmount,
   sDai,
+  assetsAmount,
+  receiver: _receiver,
   onTransactionSettled,
   enabled = true,
 }: UseSexyDaiWithdrawArgs): ReturnType<typeof useWrite> {
   const client = useQueryClient()
   const wagmiConfig = useConfig()
 
-  const { address: receiver } = useAccount()
+  const { address: owner } = useAccount()
+  const receiver = _receiver || owner
 
   const config = ensureConfigTypes({
     address: savingsXDaiAdapterAddress[gnosis.id],
@@ -45,14 +50,14 @@ export function useSexyDaiWithdraw({
     {
       onTransactionSettled: async () => {
         void client.invalidateQueries({
-          queryKey: balancesQueryKey({ chainId: gnosis.id, account: receiver }),
+          queryKey: balancesQueryKey({ chainId: gnosis.id, account: owner }),
         })
         void client.invalidateQueries({
           queryKey: allowance({
             wagmiConfig,
             chainId: gnosis.id,
             token: sDai,
-            account: receiver!,
+            account: owner!,
             spender: savingsXDaiAdapterAddress[gnosis.id],
           }).queryKey,
         })
